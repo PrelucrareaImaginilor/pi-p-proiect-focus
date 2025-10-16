@@ -1,1 +1,3 @@
 [![Review Assignment Due Date](https://classroom.github.com/assets/deadline-readme-button-22041afd0340ce965d47ae6ef1cefeee28c7c493a6346c4f15d667ab976d596c.svg)](https://classroom.github.com/a/BzgEFjMi)
+
+Recunoașterea persoanelor după mers (Gait Recognition) reprezintă o metodă de identificare de la distanță a indivizilor, bazată pe analiza unor secvențe video. Avantajele metodei prezentate, comparativ cu alte tipuri de identificare, sunt posibilitatea de a funcționa cu imagini de rezoluție slabă și capacitatea de a aduna date din diverse surse precum camere de supraveghere, senzori din podea fără a fi nevoie de acordul direct al subiecților.
