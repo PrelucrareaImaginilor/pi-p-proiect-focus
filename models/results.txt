@@ -1,0 +1,19 @@
+=== Rezultate evaluare ===
+accuracy: 0.8572829961776733
+top5_accuracy: 0.9803825404610103
+top10_accuracy: 0.9941147621383031
+predictions: [ 75  75  77 ... 104   2  67]
+true_labels: [ 75  75  77 ... 104   2  90]
+
+=== Acuratete pe unghiuri ===
+Unghi 1°: 0.819
+Unghi 2°: 0.841
+Unghi 3°: 0.912
+Unghi 4°: 0.851
+Unghi 5°: 0.899
+Unghi 6°: 0.912
+
+=== Acuratete pe conditii ===
+BG: 0.870
+CL: 0.747
+NM: 0.891
