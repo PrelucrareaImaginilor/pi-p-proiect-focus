@@ -5,86 +5,102 @@ from tqdm import tqdm
 from config import INPUT_DIR, OUTPUT_DIR, TARGET_SIZE
 
 
+VALID_EXT = ('.png', '.bmp', '.jpg', '.jpeg')
+
+
 def generate_gei(silhouette_folder, output_path):
     """
-    Generează Gait Energy Image (GEI) din siluete.
-    
-    Args:
-        silhouette_folder: Calea către folderul cu siluete
-        output_path: Calea unde va fi salvat GEI
-    
-    Returns:
-        True dacă GEI a fost generat cu succes
+    Genereaza GEI din toate siluetele dintr-un folder.
+    Optimizat pentru viteza.
     """
-    silhouette_files = sorted([f for f in os.listdir(silhouette_folder) 
-                              if f.endswith('.png')])
-    
+
+    # Lista de imagini valide
+    silhouette_files = [
+        f for f in os.listdir(silhouette_folder)
+        if f.lower().endswith(VALID_EXT)
+    ]
+
+    # Daca folderul nu are imagini, il sarim instant
     if not silhouette_files:
         return False
-    
+
     silhouettes = []
+
     for file_name in silhouette_files:
         path = os.path.join(silhouette_folder, file_name)
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-        
-        if img is not None:
-            img = cv2.resize(img, TARGET_SIZE)
-            silhouettes.append(img.astype(np.float32) / 255.0)
-    
+
+        if img is None:
+            continue
+
+        # Resize rapid
+        img = cv2.resize(img, TARGET_SIZE, interpolation=cv2.INTER_AREA)
+        silhouettes.append(img.astype(np.float32))
+
     if not silhouettes:
         return False
-    
-    # Calculează GEI (media tuturor siluetelor)
+
+    # GEI = media siluetelor
     gei = np.mean(silhouettes, axis=0)
-    
-    # Salvează GEI
-    cv2.imwrite(output_path, (gei * 255).astype(np.uint8))
+
+    # Salvare imagine
+    cv2.imwrite(output_path, gei.astype(np.uint8))
     return True
 
 
 def process_casia_b_dataset():
     """
-    Procesează întregul dataset CASIA-B și generează GEI-uri.
-    
-    Structura CASIA-B: INPUT_DIR/subject_id/sequence_type/angle/frames
-    
-    Returns:
-        Lista cu dicționare conținând info despre fiecare GEI generat
+    Proceseaza TOT datasetul CASIA-B si genereaza GEI-uri pentru toate unghiurile.
+    Optimizat pentru viteza.
     """
-    print("Incepe procesarea dataset-ului CASIA-B...")
-    
-    subject_folders = sorted([d for d in os.listdir(INPUT_DIR) 
-                             if os.path.isdir(os.path.join(INPUT_DIR, d))])
-    
+
+    print("=== Incepe procesarea dataset-ului CASIA-B (optimizat) ===")
+
     gei_info = []
-    
-    for subject_id in tqdm(subject_folders, desc="Procesare subiecti"):
+
+    subjects = sorted([
+        d for d in os.listdir(INPUT_DIR)
+        if os.path.isdir(os.path.join(INPUT_DIR, d))
+    ])
+
+    for subject_id in tqdm(subjects, desc="Subiecti"):
         subject_path = os.path.join(INPUT_DIR, subject_id)
-        
+
         for seq_type in os.listdir(subject_path):
             seq_path = os.path.join(subject_path, seq_type)
             if not os.path.isdir(seq_path):
                 continue
-            
+
             for angle in os.listdir(seq_path):
                 angle_path = os.path.join(seq_path, angle)
                 if not os.path.isdir(angle_path):
                     continue
-                
-                output_filename = f"{subject_id}_{seq_type}_{angle}_gei.png"
+
+                # Verificam rapid daca folderul are imagini
+                if not any(f.lower().endswith(VALID_EXT) for f in os.listdir(angle_path)):
+                    continue
+
+                # Normalizam unghiul
+                try:
+                    angle_int = int(angle)
+                except:
+                    continue
+
+                output_filename = f"{subject_id}_{seq_type}_{angle_int:03d}_gei.png"
                 output_path = os.path.join(OUTPUT_DIR, output_filename)
-                
+
                 if generate_gei(angle_path, output_path):
                     gei_info.append({
-                        'path': output_path,
-                        'subject_id': subject_id,
-                        'seq_type': seq_type,
-                        'angle': angle
+                        "path": output_path,
+                        "subject_id": subject_id,
+                        "condition": seq_type,
+                        "angle": angle_int
                     })
-    
-    print(f"Generate {len(gei_info)} imagini GEI")
-    
-    # Salvează informațiile pentru refolosire
-    np.save(os.path.join(OUTPUT_DIR, 'gei_info.npy'), gei_info)
-    
+
+    # Salvam informatiile
+    np.save(os.path.join(OUTPUT_DIR, "gei_info.npy"), gei_info)
+
+    print(f"\n=== Generate {len(gei_info)} GEI-uri (optimizat) ===")
+    print(f"Fisier salvat: {os.path.join(OUTPUT_DIR, 'gei_info.npy')}\n")
+
     return gei_info
