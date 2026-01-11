@@ -71,7 +71,7 @@ def main():
         print("Loading saved model...")
         model = GaitRecognitionCNN(num_classes=len(np.unique(y))).to(device)
         state_dict = torch.load(
-            f"{MODEL_DIR}/best_model_epoch100.pth",
+            f"{MODEL_DIR}/best_model_epoch500.pth",
             map_location=device
         )
         model.load_state_dict(state_dict)

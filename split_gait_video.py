@@ -34,6 +34,9 @@ def split_gait_video(
     # Background subtractor
     fgbg = cv2.createBackgroundSubtractorMOG2(history=500, varThreshold=50)
 
+    # înainte de while
+    frame_count = 0
+
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -42,14 +45,14 @@ def split_gait_video(
         fgmask = fgbg.apply(frame)
         fgmask = cv2.medianBlur(fgmask, 5)
 
-        # Detect motion
         contours, _ = cv2.findContours(fgmask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
         moving = any(cv2.contourArea(cnt) > min_area for cnt in contours)
 
-        # Start new segment
+        # Start segment
         if moving and not recording:
             recording = True
             h, w = frame.shape[:2]
+            frame_count = 0  # reset counter
 
             seq = f"{segment_idx:02d}"
             filename = f"{subject_id}_{condition}-{seq}_{angle}_gei.mp4"
@@ -58,7 +61,7 @@ def split_gait_video(
             out = cv2.VideoWriter(
                 output_path,
                 cv2.VideoWriter_fourcc(*"mp4v"),
-                fps,  # FPS original
+                fps,
                 (w, h)
             )
 
@@ -68,12 +71,20 @@ def split_gait_video(
         # Write frames
         if recording:
             out.write(frame)
+            frame_count += 1
 
-        # Stop segment when no motion
+        # Stop segment
         if not moving and recording:
             recording = False
             out.release()
             print("Stopped segment")
+
+            duration = frame_count / fps
+            if duration < 3.0:
+                print(f"Segment prea scurt ({duration:.2f}s) șters.")
+                os.remove(output_path)
+            else:
+                print(f"Segment pastrat ({duration:.2f}s).")
 
     cap.release()
     print("Done splitting video.")
@@ -87,4 +98,7 @@ def split_gait_video(
 # split_gait_video("D:\\Facultate\\Anul3\\Sem1\\PI-p\\GaHu-video\\Originals\\S005.avi", subject_id="129", condition="nm", angle="090")
 # split_gait_video("D:\\Facultate\\Anul3\\Sem1\\PI-p\\GaHu-video\\Originals\\S006.avi", subject_id="130", condition="nm", angle="090")
 # split_gait_video("D:\\Facultate\\Anul3\\Sem1\\PI-p\\GaHu-video\\Originals\\S007.avi", subject_id="131", condition="nm", angle="090")
-
+#split_gait_video("D:\\Facultate\\Anul3\\Sem1\\PI-p\\GaHu-video\\Originals\\S008.avi", subject_id="131", condition="nm", angle="090")
+split_gait_video("D:\\Facultate\\Anul3\\Sem1\\PI-p\\GaHu-video\\Originals\\S009.avi", subject_id="131", condition="nm", angle="090")
+for i in range(10, 17):
+    split_gait_video(f"D:\\Facultate\\Anul3\\Sem1\\PI-p\\GaHu-video\\Originals\\S0{i}.avi", subject_id=f"{122+i}", condition="nm", angle="090")
