@@ -103,21 +103,26 @@ def load_gei_dataset(gei_info, angle_filter=None, condition_filter=None):
 def split_dataset(X, y, gei_info):
     """
     Imparte dataset-ul in train, validation si test.
+    Stratificare doar la primul split.
     """
 
     total_test_size = VALIDATION_SPLIT + TEST_SPLIT
 
+    # 1) Train vs Temp (stratificat)
     X_train, X_temp, y_train, y_temp, gei_info_train, gei_info_temp = train_test_split(
-        X, y, gei_info, test_size=total_test_size,
-        random_state=RANDOM_SEED, stratify=y
+        X, y, gei_info,
+        test_size=total_test_size,
+        random_state=RANDOM_SEED,
+        stratify=y
     )
 
-    val_size_adjusted = VALIDATION_SPLIT / total_test_size
+    # 2) Temp → Val/Test (fara stratificare)
+    val_ratio = VALIDATION_SPLIT / total_test_size
 
     X_val, X_test, y_val, y_test, gei_info_val, gei_info_test = train_test_split(
         X_temp, y_temp, gei_info_temp,
-        test_size=(1 - val_size_adjusted),
-        random_state=RANDOM_SEED, stratify=y_temp
+        test_size=(1 - val_ratio),
+        random_state=RANDOM_SEED
     )
 
     print(f"\nDistributia datelor:")

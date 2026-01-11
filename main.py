@@ -17,10 +17,9 @@ from gei_generator import process_casia_b_dataset
 from config import OUTPUT_DIR, MODEL_DIR, EPOCHS
 from model import GaitRecognitionCNN
 from video_inference import evaluate_video
-from add_new_person import add_new_person
 
 
-TRAIN = True   # True = train, False = load saved model
+TRAIN = False   # True = train, False = load saved model
 
 
 def main():
@@ -36,20 +35,16 @@ def main():
     print_config()
 
     # ============================================================
-    # MODE: ADD NEW PERSON
-    # ============================================================
-    if args.add_person and args.videos:
-        print(f"\n=== Adding new person: {args.add_person} ===\n")
-        add_new_person(args.add_person, args.videos)
-        print("\nNew person added successfully.")
-        return
-
-    # ============================================================
     # NORMAL PIPELINE (TRAIN / LOAD / EVALUATE)
     # ============================================================
 
     print("Loading GEI metadata...")
     gei_info = load_gei_info()
+
+    if len(gei_info) == 0:
+        print("No GEI metadata found. Generating CASIA-B GEIs...")
+        process_casia_b_dataset()
+        gei_info = load_gei_info()
 
     X, y, label_encoder = load_gei_dataset(gei_info, angle_filter=None)
 
@@ -76,7 +71,7 @@ def main():
         print("Loading saved model...")
         model = GaitRecognitionCNN(num_classes=len(np.unique(y))).to(device)
         state_dict = torch.load(
-            f"{MODEL_DIR}/best_model_epoch50.pth",
+            f"{MODEL_DIR}/best_model_epoch100.pth",
             map_location=device
         )
         model.load_state_dict(state_dict)

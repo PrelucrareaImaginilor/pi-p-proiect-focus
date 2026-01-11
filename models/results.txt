@@ -1,31 +1,31 @@
 === Rezultate evaluare ===
-accuracy: 0.9009318351745605
-top5_accuracy: 0.9892103972535556
-top10_accuracy: 0.9970573810691515
-predictions: [ 75  75  77 ... 104   2  90]
-true_labels: [ 75  75  77 ... 104   2  90]
+accuracy: 0.8697993159294128
+top5_accuracy: 0.9823788546255506
+top10_accuracy: 0.9946157611355849
+predictions: [ 57  17  19 ...  37  34 111]
+true_labels: [ 57  17  19 ...  37  34 111]
 
 === Acuratete pe unghiuri ===
-Unghi 0°: 0.723
-Unghi 18°: 0.909
-Unghi 36°: 0.944
-Unghi 54°: 0.954
-Unghi 72°: 0.984
-Unghi 90°: 0.984
-Unghi 108°: 0.985
-Unghi 126°: 0.963
-Unghi 144°: 0.913
-Unghi 162°: 0.817
-Unghi 180°: 0.747
+Unghi 0°: 0.708
+Unghi 18°: 0.872
+Unghi 36°: 0.921
+Unghi 54°: 0.925
+Unghi 72°: 0.973
+Unghi 90°: 0.932
+Unghi 108°: 0.950
+Unghi 126°: 0.932
+Unghi 144°: 0.906
+Unghi 162°: 0.820
+Unghi 180°: 0.658
 
 === Acuratete pe conditii ===
-BG-01: 0.907
-BG-02: 0.907
-CL-01: 0.788
-CL-02: 0.828
-NM-01: 0.901
-NM-02: 0.933
-NM-03: 0.940
-NM-04: 0.918
-NM-05: 0.955
-NM-06: 0.947
+BG-01: 0.812
+BG-02: 0.903
+CL-01: 0.744
+CL-02: 0.748
+NM-01: 0.894
+NM-02: 0.919
+NM-03: 0.919
+NM-04: 0.917
+NM-05: 0.925
+NM-06: 0.913

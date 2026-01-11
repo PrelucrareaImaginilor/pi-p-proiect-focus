@@ -9,18 +9,11 @@ VALID_EXT = ('.png', '.bmp', '.jpg', '.jpeg')
 
 
 def generate_gei(silhouette_folder, output_path):
-    """
-    Genereaza GEI din toate siluetele dintr-un folder.
-    Optimizat pentru viteza.
-    """
-
-    # Lista de imagini valide
     silhouette_files = [
         f for f in os.listdir(silhouette_folder)
         if f.lower().endswith(VALID_EXT)
     ]
 
-    # Daca folderul nu are imagini, il sarim instant
     if not silhouette_files:
         return False
 
@@ -29,31 +22,33 @@ def generate_gei(silhouette_folder, output_path):
     for file_name in silhouette_files:
         path = os.path.join(silhouette_folder, file_name)
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-
         if img is None:
             continue
 
-        # Resize rapid
-        img = cv2.resize(img, TARGET_SIZE, interpolation=cv2.INTER_AREA)
-        silhouettes.append(img.astype(np.float32))
+        # 1. Binarizare (critică!)
+        _, binary = cv2.threshold(img, 127, 255, cv2.THRESH_BINARY)
+
+        # 2. Normalizare la 0-1
+        binary = binary / 255.0
+
+        # 3. Resize
+        binary = cv2.resize(binary, TARGET_SIZE, interpolation=cv2.INTER_NEAREST)
+
+        silhouettes.append(binary.astype(np.float32))
 
     if not silhouettes:
         return False
 
-    # GEI = media siluetelor
+    # 4. GEI = media siluetelor
     gei = np.mean(silhouettes, axis=0)
 
-    # Salvare imagine
-    cv2.imwrite(output_path, gei.astype(np.uint8))
+    # 5. Salvare
+    cv2.imwrite(output_path, (gei * 255).astype(np.uint8))
     return True
 
 
-def process_casia_b_dataset():
-    """
-    Proceseaza TOT datasetul CASIA-B si genereaza GEI-uri pentru toate unghiurile.
-    Optimizat pentru viteza.
-    """
 
+def process_casia_b_dataset():
     print("=== Incepe procesarea dataset-ului CASIA-B (optimizat) ===")
 
     gei_info = []
@@ -76,11 +71,9 @@ def process_casia_b_dataset():
                 if not os.path.isdir(angle_path):
                     continue
 
-                # Verificam rapid daca folderul are imagini
                 if not any(f.lower().endswith(VALID_EXT) for f in os.listdir(angle_path)):
                     continue
 
-                # Normalizam unghiul
                 try:
                     angle_int = int(angle)
                 except:
@@ -97,7 +90,6 @@ def process_casia_b_dataset():
                         "angle": angle_int
                     })
 
-    # Salvam informatiile
     np.save(os.path.join(OUTPUT_DIR, "gei_info.npy"), gei_info)
 
     print(f"\n=== Generate {len(gei_info)} GEI-uri (optimizat) ===")
